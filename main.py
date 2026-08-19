@@ -5,8 +5,7 @@ import time
 import requests
 from datetime import datetime
 import pytz
-from google import genai
-from google.genai import types
+import google.generativeai as genai
 
 # ==========================================
 # السيرفر الوهمي لإبقاء الخدمة نشطة على Render
@@ -31,8 +30,7 @@ GEMINI_API_KEY = "AQ.Ab8RN6JYD2vDw3ytFgeTRzCHPzd9-bWnkFnHbqQj7LGGLhS29Q"
 TELEGRAM_BOT_TOKEN = "8913585593:AAE2qayGXug57XhnJUuFjJKAB4sBkDazPuM"
 TELEGRAM_CHAT_ID = 8060030812
 
-# تهيئة العميل بالمكتبة الجديدة الرسمية
-client = genai.Client(api_key=GEMINI_API_KEY)
+genai.configure(api_key=GEMINI_API_KEY)
 
 SYSTEM_PROMPT = """
 أنت أيجنت ذكاء اصطناعي متخصص في تحليل أخبار وسوق العملات الرقمية. لست مستشاراً مالياً، ومهمتك هي تحليل الأخبار المجلوبة بدقة وحيادية.
@@ -54,6 +52,11 @@ SYSTEM_PROMPT = """
 * 💡 سبب التأثير: [شرح مختصر لسبب إيجابية أو سلبية الخبر]
 * ⏳ المدى الزمني: [تأثير لحظي/سريع أم للمدى الطويل؟]
 """
+
+model = genai.GenerativeModel(
+    model_name="gemini-2.5-flash",
+    system_instruction=SYSTEM_PROMPT
+)
 
 def send_telegram_message(chat_id, message):
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
@@ -83,13 +86,7 @@ while True:
         
         prompt = "هل هناك أي أخبار حديثة أو هامة خلال الساعات الماضية لعملات WLD, XRP, ADA, HBAR؟ إذا وجد خبر يرجى تحليله بالصيغة المحددة."
         
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_PROMPT
-            )
-        )
+        response = model.generate_content(prompt)
         
         if response.text:
             send_telegram_message(TELEGRAM_CHAT_ID, response.text)
