@@ -1,7 +1,16 @@
 import os
 import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
+import time
+import requests
+from datetime import datetime
+import pytz
+from google import genai
+from google.genai import types
 
+# ==========================================
+# السيرفر الوهمي لإبقاء الخدمة نشطة على Render
+# ==========================================
 class HealthCheckHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         self.send_response(200)
@@ -14,11 +23,6 @@ def run_health_server():
     server.serve_forever()
 
 threading.Thread(target=run_health_server, daemon=True).start()
-import time
-import requests
-from datetime import datetime
-import pytz
-import google.generativeai as genai
 
 # ==========================================
 # المفاتيح والبيانات الخاصّة بك
@@ -27,7 +31,8 @@ GEMINI_API_KEY = "AQ.Ab8RN6JYD2vDw3ytFgeTRzCHPzd9-bWnkFnHbqQj7LGGLhS29Q"
 TELEGRAM_BOT_TOKEN = "8913585593:AAE2qayGXug57XhnJUuFjJKAB4sBkDazPuM"
 TELEGRAM_CHAT_ID = 8060030812
 
-genai.configure(api_key=GEMINI_API_KEY)
+# تهيئة العميل بالمكتبة الجديدة الرسمية
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 SYSTEM_PROMPT = """
 أنت أيجنت ذكاء اصطناعي متخصص في تحليل أخبار وسوق العملات الرقمية. لست مستشاراً مالياً، ومهمتك هي تحليل الأخبار المجلوبة بدقة وحيادية.
@@ -50,16 +55,12 @@ SYSTEM_PROMPT = """
 * ⏳ المدى الزمني: [تأثير لحظي/سريع أم للمدى الطويل؟]
 """
 
-model = genai.GenerativeModel(
-    model_name="gemini-3.6-flash",
-    system_instruction=SYSTEM_PROMPT
-)
-
 def send_telegram_message(chat_id, message):
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     payload = {"chat_id": chat_id, "text": message}
     try:
-        requests.post(url, json=payload)
+        res = requests.post(url, json=payload)
+        print(f"حالة الإرسال لتليجرام: {res.status_code}")
     except Exception as e:
         print(f"خطأ في الإرسال: {e}")
 
@@ -81,7 +82,14 @@ while True:
         print(f"\n[{now_str}] جاري فحص السوق...")
         
         prompt = "هل هناك أي أخبار حديثة أو هامة خلال الساعات الماضية لعملات WLD, XRP, ADA, HBAR؟ إذا وجد خبر يرجى تحليله بالصيغة المحددة."
-        response = model.generate_content(prompt)
+        
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                system_instruction=SYSTEM_PROMPT
+            )
+        )
         
         if response.text:
             send_telegram_message(TELEGRAM_CHAT_ID, response.text)
