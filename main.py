@@ -13,7 +13,8 @@ def run_health_server():
     server = HTTPServer(('0.0.0.0', port), HealthCheckHandler)
     server.serve_forever()
 
-threading.Thread(target=run_health_server, daemon=True).start()import time
+threading.Thread(target=run_health_server, daemon=True).start()
+import time
 import requests
 from datetime import datetime
 import pytz
