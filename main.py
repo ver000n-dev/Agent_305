@@ -47,10 +47,14 @@ RSS_FEEDS = [
 ]
 
 COINS = [
-    "XRP",
-    "ADA",
-    "HBAR",
-    "WLD"
+"XRP",
+"RIPPLE",
+"ADA",
+"CARDANO",
+"HBAR",
+"HEDERA",
+"WLD",
+"WORLDCOIN"
 ]
 
 seen_links = set()
