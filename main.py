@@ -70,6 +70,8 @@ while True:
 
     try:
 
+        send_discord_message("🔍 New scan started")
+
         print("=" * 50)
         print("NEW SCAN STARTED")
         print("Checking RSS feeds...")
