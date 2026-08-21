@@ -47,14 +47,14 @@ RSS_FEEDS = [
 ]
 
 COINS = [
-"XRP",
-"RIPPLE",
-"ADA",
-"CARDANO",
-"HBAR",
-"HEDERA",
-"WLD",
-"WORLDCOIN"
+    "XRP",
+    "RIPPLE",
+    "ADA",
+    "CARDANO",
+    "HBAR",
+    "HEDERA",
+    "WLD",
+    "WORLDCOIN"
 ]
 
 seen_links = set()
@@ -70,9 +70,17 @@ while True:
 
     try:
 
+        print("=" * 50)
+        print("NEW SCAN STARTED")
+        print("Checking RSS feeds...")
+
         for feed_url in RSS_FEEDS:
 
+            print(f"Checking: {feed_url}")
+
             feed = feedparser.parse(feed_url)
+
+            print(f"Articles Found: {len(feed.entries)}")
 
             for entry in feed.entries:
 
@@ -97,6 +105,9 @@ while True:
 
                 if matched_coin:
 
+                    print(f"MATCH FOUND: {matched_coin}")
+                    print(f"TITLE: {title}")
+
                     msg = f"""
 🪙 {matched_coin}
 
@@ -111,7 +122,8 @@ while True:
 
                     print("News Sent:", matched_coin)
 
-        print("Waiting 30 minutes...")
+        print("SCAN COMPLETED")
+        print("Sleeping 30 minutes...")
 
     except Exception as e:
         print("Error:", e)
