@@ -130,4 +130,4 @@ while True:
     except Exception as e:
         print("Error:", e)
 
-    time.sleep(1800)
+    time.sleep(60)
